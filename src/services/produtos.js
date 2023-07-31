@@ -8,5 +8,9 @@ export default{
 
     salvar:(produto) => {
         return http.post('produtos', produto)
+    },
+
+    atualizar:(produto) => {
+        return http.put('produtos/' + produto.id, produto)
     }
 }

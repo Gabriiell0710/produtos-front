@@ -7,6 +7,12 @@
     </nav>
 
     <div class="container">
+
+      <ul>
+        <li v-for="(erro, index) of errors" :key="index">
+          campo <b>{{ erro.field }}</b> - {{ erro.defaultMessage }}
+        </li>
+      </ul>
       
       <form @submit.prevent="salvar">
 
@@ -38,7 +44,7 @@
             <td>{{ produto.quantidade }}</td>
             <td>{{ produto.preco }}</td>
             <td>
-              <button class="waves-effect btn-small blue darken-1">
+              <button @click="editar(produto)" class="waves-effect btn-small blue darken-1">
                 <i class="material-icons">create</i>
               </button>
               <button class="waves-effect btn-small red darken-1">
@@ -59,27 +65,56 @@ export default {
   data(){
     return {
       produto: {
+        id: '',
         nome: '',
         quantidade: '',
         preco: ''
       },
-      produtos: []
+      produtos: [],
+      errors: []
     }
   },
 
   mounted(){
-    Produto.listar().then(resposta => {
-      console.log(resposta.data)
-      this.produtos = resposta.data
-    })
+    this.listar()
   },
 
   methods:{
-    salvar(){
-      Produto.salvar(this.produto).then(resposta => {
-        this.resposta = resposta
-        alert('Salvo com sucesso!')
+
+    listar(){
+      Produto.listar().then(resposta => {
+        this.produtos = resposta.data
       })
+    },
+
+
+    salvar(){
+      if(!this.produto.id){
+        Produto.salvar(this.produto).then(resposta => {
+          this.resposta = resposta
+          this.produto = {}
+          alert('Salvo com sucesso!')
+          this.listar()
+          this.errors = []
+        }).catch( e => {
+          this.errors = e.response.data.errors
+      })
+    }else{
+      Produto.atualizar(this.produto).then(resposta => {
+          this.resposta = resposta
+          this.produto = {}
+          alert('Atualizado com sucesso!')
+          this.listar()
+          this.errors = []
+        }).catch( e => {
+          this.errors = e.response.data.errors
+      })
+    }
+      },
+      
+
+    editar(produto){
+      this.produto = produto
     }
   }
 }
